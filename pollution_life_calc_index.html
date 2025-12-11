@@ -1,0 +1,426 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Pollution killed my love — NCR Pollution Life-loss</title>
+  <style>
+    :root{
+      --bg:#f7f5ef; /* soft off‑white */
+      --accent:#dfeaf8; /* very light pastel blue page bg */
+      --primary:#7aaed6; /* pastel blue */
+      --muted:#6b7280;
+      --card-shadow:0 12px 40px rgba(0,0,0,0.08);
+    }
+    html,body{height:100%;margin:0;font-family:Inter,system-ui,Arial;color:#111827;background:var(--accent)}
+    .page{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding:20px}
+    .container{width:100%;max-width:980px}
+    .card{background:var(--bg);border-radius:12px;padding:28px;box-shadow:var(--card-shadow);position:relative}
+
+    header{display:flex;flex-direction:column;align-items:center;text-align:center;margin-bottom:8px}
+    header h1{margin:0;font-size:36px;color:#111827}
+    header h2{margin:6px 0 0 0;font-size:16px;color:var(--primary);font-weight:700}
+
+    .wizard-wrap{display:flex;flex-direction:column;gap:18px}
+    .inputs{flex:1}
+
+    .step{display:none}
+    .step.active{display:block}
+    label{display:block;margin-top:14px;font-weight:700;color:#111827;font-size:18px}
+    select,input[type=number]{width:100%;padding:12px;border-radius:10px;border:3px solid #7f1d1d;background:#fff;margin-top:10px;font-size:16px;box-shadow:0 0 4px rgba(0,0,0,0.12)}
+
+    /* bottom nav bar */
+    .nav-bar{display:flex;gap:12px;justify-content:center;align-items:center;margin-top:20px}
+    .nav-bar .btn{min-width:140px;padding:12px;border-radius:10px;border:none;cursor:pointer;font-weight:700;font-size:16px}
+    .btn.back{background:transparent;border:2px solid rgba(0,0,0,0.06);color:#374151}
+    .btn.next{background:var(--primary);color:#fff}
+    .btn.calculate{
+  background: var(--primary);
+  color: #fff;
+  border: 3px solid #4a89b5; /* stronger contrast */
+  box-shadow: 0 0 6px rgba(0,0,0,0.25);
+}
+
+    /* tether explanation footer */
+    .explanation{position:fixed;left:0;right:0;bottom:0;background:rgba(255,255,255,0.96);border-top:1px solid #eef0ec;padding:14px 20px;font-size:14px;color:#374151}
+    .explanation strong{display:block;margin-bottom:6px}
+
+    /* modal */
+    .modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,0.45);display:none;align-items:center;justify-content:center}
+    .modal{width:min(520px,92%);max-height:80vh;overflow-y:auto;background:#fff;border-radius:12px;padding:16px;box-shadow:0 20px 60px rgba(0,0,0,0.16)}
+    .modal h2{margin:0 0 8px;font-size:20px;color:var(--primary)}
+    .modal .big-phrase{font-size:26px;font-weight:800;color:#111827;margin:12px 0}
+    .modal p{margin:8px 0;color:#111827;font-size:15px}
+    .modal .disclaimer{background:#fff6f6;border:1px solid #ffdddd;padding:12px;border-radius:8px;color:#7f1d1d;font-size:13px}
+
+    @media(max-width:900px){.wizard-wrap{flex-direction:column}.nav-bar{flex-direction:row;gap:8px}.nav-bar .btn{min-width:110px}}
+    @media(max-width:520px){header h1{font-size:22px} label,input,select{font-size:15px}.modal .big-phrase{font-size:20px}}
+  </style>
+</head>
+<body>
+  <div class="page">
+    <div class="container">
+      <div class="card" role="form" aria-labelledby="title">
+        <header>
+          <h1 id="title">Pollution killed my love</h1>
+          <h2 id="subtitle">Clinical Memorial — NCR Pollution Life-loss</h2>
+        </header>
+
+        <div class="wizard-wrap">
+          <div class="inputs">
+            <div class="progress" aria-hidden="true" style="height:12px;background:#fff;border-radius:10px;margin-bottom:14px"><i id="progressBar" style="display:block;height:100%;background:linear-gradient(90deg,var(--primary),#cfe8fb);width:0%"></i></div>
+
+            <form id="wizard">
+              <!-- Step 1 -->
+              <section class="step active" data-step="1">
+                <p class="meta">Step 1 of 8 — Region (NCR)</p>
+                <label>Region in Delhi National Capital Region (select where they lived)</label>
+                <select id="region" aria-label="Region">
+                  <option value="delhi">Delhi</option>
+                  <option value="north_delhi">North Delhi</option>
+                  <option value="south_delhi">South Delhi</option>
+                  <option value="east_delhi">East Delhi</option>
+                  <option value="west_delhi">West Delhi</option>
+                  <option value="gurgaon">Gurugram (Gurgaon)</option>
+                  <option value="noida">Noida</option>
+                  <option value="greater_noida">Greater Noida</option>
+                  <option value="ghaziabad">Ghaziabad</option>
+                  <option value="faridabad">Faridabad</option>
+                  <option value="sonipat">Sonipat</option>
+                  <option value="bahadurgarh">Bahadurgarh</option>
+                  <option value="meerut">Meerut</option>
+                  <option value="other">Other (select nearest region)</option>
+                </select>
+              </section>
+
+              <!-- Step 2 -->
+              <section class="step" data-step="2">
+                <p class="meta">Step 2 of 8 — Years lived in the region</p>
+                <label>Years lived in this region (last years of life)</label>
+                <select id="yearsInArea">
+                  <option value="3">Less than 5 years</option>
+                  <option value="7">5–10 years</option>
+                  <option value="15">10–20 years</option>
+                  <option value="25">20+ years</option>
+                </select>
+              </section>
+
+              <!-- Step 3 -->
+              <section class="step" data-step="3">
+                <p class="meta">Step 3 of 8 — Age</p>
+                <label>Age at death (years)</label>
+                <input id="age" type="number" min="0" max="120" value="50" />
+              </section>
+
+              <!-- Step 4 -->
+              <section class="step" data-step="4">
+                <p class="meta">Step 4 of 8 — Outdoor exposure</p>
+                <label>Typical time outdoors / occupation exposure</label>
+                <select id="outdoor">
+                  <option value="0.9">Mostly indoors</option>
+                  <option value="1.0" selected>Mixed</option>
+                  <option value="1.25">Mostly outdoor / traffic-exposed</option>
+                </select>
+              </section>
+
+              <!-- Step 5 -->
+              <section class="step" data-step="5">
+                <p class="meta">Step 5 of 8 — Smoking (at the time of death)</p>
+                <label>Smoking status</label>
+                <select id="smoke">
+                  <option value="none">Never</option>
+                  <option value="former">Former (left more than 10 years ago)</option>
+                  <option value="current">Current smoker</option>
+                </select>
+              </section>
+
+              <!-- Step 6 -->
+              <section class="step" data-step="6">
+                <p class="meta">Step 6 of 8 — Respiratory conditions</p>
+                <label>Respiratory disease</label>
+                <select id="resp">
+                  <option value="none">None</option>
+                  <option value="mild">Asthma / mild</option>
+                  <option value="severe">COPD / severe</option>
+                </select>
+              </section>
+
+              <!-- Step 7 -->
+              <section class="step" data-step="7">
+                <p class="meta">Step 7 of 8 — Cardiometabolic</p>
+                <label>Heart / metabolic conditions</label>
+                <select id="cvd">
+                  <option value="none">None</option>
+                  <option value="one">One condition (e.g., hypertension, diabetes)</option>
+                  <option value="multiple">Multiple / major CVD</option>
+                </select>
+              </section>
+
+              <!-- Step 8 optional -->
+              <section class="step" data-step="8">
+                <p class="meta">Step 8 of 8 — Optional</p>
+                <label>Indoor fuel (cooking)</label>
+                <select id="indoor">
+                  <option value="1.0">Clean / electric</option>
+                  <option value="1.05">LPG</option>
+                  <option value="1.25">Biomass / solid fuel</option>
+                </select>
+
+                <label>Proximity to major road / industry</label>
+                <select id="proximity">
+                  <option value="1.0">Far (&gt;1 km)</option>
+                  <option value="1.1">Moderate (200 m - 1 km)</option>
+                  <option value="1.2">Very close (&lt;200 m)</option>
+                </select>
+
+                <label>Use of mitigation (HEPA / masks)</label>
+                <select id="mitigation">
+                  <option value="1.0">Never</option>
+                  <option value="0.9">Occasionally</option>
+                  <option value="0.75">Regular HEPA / consistent masking</option>
+                </select>
+              </section>
+
+            </form>
+          </div>
+
+          <!-- bottom navigation bar -->
+          <div class="nav-bar" role="navigation" aria-label="form navigation">
+            <button id="btnBack" class="btn back">Back</button>
+            <button id="btnNext" class="btn next">Next</button>
+            <button id="btnCalc" class="btn calculate" style="display:none">Calculate</button>
+          </div>
+
+        </div>
+
+      </div>
+    </div>
+
+    <!-- explanation tethered to bottom -->
+    <div class="explanation" id="longExplanationFooter" style="cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:12px;padding:12px 20px">
+      <div style="flex:1">
+        <strong style="display:block;margin-bottom:6px">Purpose & method — click to open</strong>
+        <div style="color:#6b7280;font-size:13px">Click to read a short explanation of how the estimate is calculated (opens in a pop-up).</div>
+      </div>
+      <div>
+        <button id="openExplain" class="btn next" style="min-width:120px;padding:10px 14px">Open</button>
+      </div>
+    </div>
+
+    <!-- Explanation modal (opens when user clicks footer) -->
+    <div id="explainModalBackdrop" class="modal-backdrop" role="dialog" aria-modal="true" style="display:none">
+      <div class="modal" role="document">
+        <h2>Purpose & method</h2>
+        <div style="margin-top:8px;color:#374151;font-size:14px;line-height:1.45">
+          <p>This site provides an illustrative, population-level estimate (using India\'s average life expectancy of ~73 years only as context, not as a strict cap or target) of how many additional years a deceased loved one might have lived had ambient air pollution in their NCR region been absent.</p>
+          <p>The estimate uses region-specific baseline life-loss estimates, a simple historical trend factor (to account for higher PM2.5 in recent decades), exposure multipliers (outdoor time, indoor fuel, proximity to traffic/industry, mitigation) and vulnerability multipliers (age, smoking, chronic conditions). Results are heuristic and intended for awareness and memorial purposes, not clinical or legal use.</p>
+          <p><strong>Age and sensitivity:</strong> Older bodies are generally more vulnerable to the harms of long-term air pollution. That means, all else equal, if your loved one was older at death we increase the modelled life-years taken by pollution proportionally; if they were younger, the pollution-driven life-loss is reduced. The calculator applies both an age-based vulnerability multiplier and an age-weight to the computed years to reflect this. To avoid implausible outcomes (for example, adding decades back to a very old person), the tool also applies conservative caps described below.</p>
+          <p><strong>Mitigation of extreme values:</strong> To prevent unrealistic estimates we cap the calculated gain by: (a) the remaining years up to a contextual baseline life expectancy (≈73 years), and (b) an absolute hard cap (20 years) chosen as a conservative ceiling for illustrative purposes. These safeguards keep results reasonable while still reflecting that older people are more affected by pollution.</p>
+          <p>For rigorous attribution, implement age-sex life tables combined with exposure–response relative risks (GBD/IER) and local PM2.5 time series.</p>
+        </div>
+        <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:16px">
+          <button id="closeExplain" class="btn back">Close</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- modal -->
+    <div id="modalBackdrop" class="modal-backdrop" role="dialog" aria-modal="true">
+      <div class="modal" role="document">
+        <h2 id="modalTitle">Estimated years lost to pollution</h2>
+        <div id="modalBody"></div>
+        <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:16px">
+          <button id="modalClose" class="btn back">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // --- Data and config (prototype) ---
+    const regionBase = {delhi:98.4, north_delhi:98.4, south_delhi:98.4, east_delhi:98.4, west_delhi:98.4, gurgaon:95.0, noida:90.0, greater_noida:88.0, ghaziabad:102.0, faridabad:92.0, sonipat:85.0, bahadurgarh:80.0, meerut:82.0};
+    const regionDeltaSince1998 = {delhi:0.44, gurgaon:0.38, noida:0.40, greater_noida:0.40, ghaziabad:0.50, faridabad:0.42, sonipat:0.30, bahadurgarh:0.32, meerut:0.35};
+    const conditionMonths = {smoker_current:120, smoker_former:42, ihd:36, diabetes:30, copd:36};
+    const vulnWeights = {smoker_current:0.30, smoker_former:0.12, ihd:0.15, diabetes:0.10, copd:0.25};
+    const overlapScale = 0.25;
+
+    // wizard
+    const steps = Array.from(document.querySelectorAll('.step'));
+    const progress = document.getElementById('progressBar');
+    let current = 0;
+
+    function showStep(i){
+      steps.forEach((s,idx)=> s.classList.toggle('active', idx===i));
+      const pct = Math.round(((i+1)/steps.length)*100);
+      progress.style.width = pct + '%';
+      current = i;
+      updateButtons();
+    }
+
+    // nav buttons
+    const btnBack = document.getElementById('btnBack');
+    const btnNext = document.getElementById('btnNext');
+    const btnCalc = document.getElementById('btnCalc');
+
+    btnBack.addEventListener('click', ()=>{ if(current>0) showStep(current-1); });
+    btnNext.addEventListener('click', ()=>{ if(current<steps.length-1) showStep(current+1); });
+
+    // Calculate -> gather inputs and show modal
+    btnCalc.addEventListener('click', ()=>{
+      const region = document.getElementById('region').value;
+      const yearsInArea = Number(document.getElementById('yearsInArea').value);
+      const age = Number(document.getElementById('age').value) || 0;
+      const outdoor = Number(document.getElementById('outdoor').value);
+      const smoke = document.getElementById('smoke').value;
+      const resp = document.getElementById('resp').value;
+      const cvd = document.getElementById('cvd').value;
+      const indoor = Number(document.getElementById('indoor').value);
+      const proximity = Number(document.getElementById('proximity').value);
+      const mitigation = Number(document.getElementById('mitigation').value);
+
+      // base P for region
+      let P = regionBase[region] || 42.0;
+
+      // historical trend scaling
+      const currentYear = new Date().getFullYear();
+      const sinceYear = 1998;
+      const yearsSince = Math.max(0, Math.min(yearsInArea, currentYear - sinceYear));
+      const fractionPost1998 = yearsInArea>0 ? (yearsSince / yearsInArea) : 0;
+      const delta = regionDeltaSince1998[region] || 0.38;
+      const trendFactor = 1 + delta * fractionPost1998;
+      P = P * trendFactor;
+
+      // duration factor
+      let durationFactor = Math.min(1.5, Math.max(0.6, yearsInArea / 10));
+
+      // exposure factor
+      let exposureFactor = outdoor * indoor * proximity * mitigation * durationFactor;
+      exposureFactor = Math.min(1.6, Math.max(0.7, exposureFactor));
+
+      // comorbidity months
+      let C_total = 0;
+      if(smoke === 'current') C_total += conditionMonths.smoker_current;
+      if(smoke === 'former') C_total += conditionMonths.smoker_former;
+      if(resp === 'mild') C_total += 12;
+      if(resp === 'severe') C_total += conditionMonths.copd;
+      if(cvd === 'one') C_total += conditionMonths.ihd;
+      if(cvd === 'multiple') C_total += conditionMonths.ihd + conditionMonths.diabetes;
+
+      const C_scaled = C_total * overlapScale;
+      const overlapFraction = (P + 0.0001) > 0 ? (C_scaled / (P + C_scaled)) : 0;
+      const P_adj1 = P * (1 - overlapFraction);
+
+      // vulnerability multiplier
+      let sum_w = 0;
+      if(smoke === 'current') sum_w += vulnWeights.smoker_current;
+      if(smoke === 'former') sum_w += vulnWeights.smoker_former;
+      if(resp === 'mild') sum_w += 0.08;
+      if(resp === 'severe') sum_w += vulnWeights.copd;
+      if(cvd === 'one') sum_w += vulnWeights.ihd;
+      if(cvd === 'multiple') sum_w += (vulnWeights.ihd + vulnWeights.diabetes);
+
+      // age-based vulnerability scaling (stronger effect for older, smaller for younger)
+      // Explanation: older individuals are more susceptible to pollution-related mortality. We therefore
+      // (1) increase the vulnerability multiplier `V` for older ages so pollution months translate to more life-loss,
+      // (2) apply an age-based multiplier to the computed years gained to reflect physiological sensitivity.
+      // Both steps are heuristic and intended to capture the epidemiological observation that risk rises with age.
+      let ageFactor = 1.0;
+      if(age >= 75) ageFactor = 1.35;        // quite vulnerable
+      else if(age >= 65) ageFactor = 1.2;    // more vulnerable
+      else if(age >= 50) ageFactor = 1.05;   // slight increase
+      else if(age < 40) ageFactor = 0.85;    // younger, less impact
+      sum_w *= ageFactor;
+
+      let V = Math.min(1 + sum_w, 1.35);
+
+      const finalP = P_adj1 * V * exposureFactor;
+      const P_capped = Math.max(0, Math.min(finalP, 360));
+
+      // Age-weighted gained years (apply age-sensitivity)
+      // base gained years from pollution months
+      const baseGainedYears = P_capped / 12;
+      // additional age multiplier to increase effect for older ages and reduce for younger
+      let ageMultiplier = 1.0;
+      if(age >= 75) ageMultiplier = 1.2;
+      else if(age >= 65) ageMultiplier = 1.15;
+      else if(age >= 50) ageMultiplier = 1.05;
+      else if(age < 40) ageMultiplier = 0.75;
+
+      let gainedYears = baseGainedYears * ageMultiplier;
+
+      // Mitigate extreme values: cannot gain more years than reasonable remaining life expectancy
+      const baselineLE = 73; // contextual baseline used as cap
+      const maxPossibleGain = Math.max(0, baselineLE - age);
+      // absolute hard cap (avoid absurd outcomes)
+      const hardCapYears = 20;
+
+      // final gain is min of computed, remaining life until baseline, and hard cap
+      const finalGain = Math.min(gainedYears, maxPossibleGain, hardCapYears);
+
+      const counterfactualAge = age + finalGain;
+
+      // uncertainty (scale around finalGain)
+      const lowerY = Math.max(0, +(Math.max(0, finalGain * 0.75)).toFixed(2));
+      const upperY = +(Math.min(hardCapYears, finalGain * 1.25).toFixed(2));
+      const centralY = +finalGain.toFixed(2);
+
+      // phrase
+      let phrase = '';
+      if(Math.abs(upperY - lowerY) < 0.4){
+        const val = Math.round(centralY);
+        phrase = `You could have had ${val} more year${val===1?'':'s'} with your loved one if it were not for pollution.`;
+      } else {
+        const a = Math.floor(lowerY);
+        const b = Math.ceil(upperY);
+        phrase = `You could have had approximately ${a}–${b} more years with your loved one if it were not for pollution.`;
+      }
+
+      // show modal
+      const modalBackdrop = document.getElementById('modalBackdrop');
+      const modalBody = document.getElementById('modalBody');
+      modalBody.innerHTML = `
+        <div class="big-phrase">${phrase}</div>
+        <p class="muted">Central estimate: <strong>${centralY.toFixed(2)} years</strong>. Uncertainty range: <strong>${lowerY} – ${upperY} years</strong>.</p>
+        <table>
+          <tr><th>Parameter</th><th>Value (prototype)</th></tr>
+          <tr><td>Region base pollution months (post-trend)</td><td>${P.toFixed(1)} mo</td></tr>
+          <tr><td>Comorbidity scaled overlap</td><td>${C_scaled.toFixed(1)} mo</td></tr>
+          <tr><td>Exposure factor</td><td>${exposureFactor.toFixed(2)}</td></tr>
+          <tr><td>Vulnerability multiplier</td><td>${V.toFixed(2)}</td></tr>
+          <tr><td>Illustrative counterfactual age at death</td><td>${counterfactualAge.toFixed(2)} years</td></tr>
+        </table>
+        <div style="margin-top:12px" class="disclaimer"><strong>Disclaimer:</strong> This estimate is illustrative and based on population-average heuristics. It is not a clinical prognosis. For rigorous attribution use life-table methods and exposure–response models (GBD/IER) with local PM2.5 time series.</div>
+      `;
+      modalBackdrop.style.display = 'flex';
+    });
+
+    document.getElementById('modalClose').addEventListener('click', ()=>{ document.getElementById('modalBackdrop').style.display = 'none'; });
+
+    // Explanation modal open/close handlers (footer Open button)
+    const openExplainBtn = document.getElementById('openExplain');
+    const explainModal = document.getElementById('explainModalBackdrop');
+    const closeExplainBtn = document.getElementById('closeExplain');
+    if(openExplainBtn && explainModal){
+      openExplainBtn.addEventListener('click', ()=>{ explainModal.style.display = 'flex'; explainModal.style.zIndex = 9999; });
+    }
+    if(closeExplainBtn && explainModal){
+      closeExplainBtn.addEventListener('click', ()=>{ explainModal.style.display = 'none'; });
+    }
+
+    // show/hide buttons based on step
+    function updateButtons(){
+      if(current === 0){ document.getElementById('btnBack').style.visibility = 'hidden'; } else { document.getElementById('btnBack').style.visibility = 'visible'; }
+      if(current === steps.length-1){
+        document.getElementById('btnNext').style.display = 'none';
+        document.getElementById('btnCalc').style.display = 'inline-block';
+      } else {
+        document.getElementById('btnNext').style.display = 'inline-block';
+        document.getElementById('btnCalc').style.display = 'none';
+      }
+    }
+
+    // init
+    showStep(0);
+  </script>
+</body>
+</html>
