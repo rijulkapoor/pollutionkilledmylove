@@ -27,7 +27,7 @@
     .step{display:none}
     .step.active{display:block}
     label{display:block;margin-top:14px;font-weight:700;color:#111827;font-size:18px}
-    select,input[type=number]{width:100%;padding:12px;border-radius:10px;border:3px solid #7f1d1d;background:#fff;margin-top:10px;font-size:16px;box-shadow:0 0 4px rgba(0,0,0,0.12)}
+    select,input[type=number]{box-sizing:border-box;width:100%;padding:12px;border-radius:10px;border:3px solid #7f1d1d;background:#fff;margin-top:10px;font-size:16px;box-shadow:0 0 4px rgba(0,0,0,0.12)}
 
     /* bottom nav bar */
     .nav-bar{display:flex;gap:12px;justify-content:center;align-items:center;margin-top:20px}
@@ -62,11 +62,12 @@
     <div class="container">
       <div class="card" role="form" aria-labelledby="title">
         <header>
-          <h1 id="title">Pollution killed my love</h1>
+          <h1 id="title">🕊️ Pollution killed my love</h1>
           <h2 id="subtitle">Clinical Memorial — NCR Pollution Life-loss</h2>
         </header>
 
         <div class="wizard-wrap">
+          <p style="text-align:center;font-size:16px;color:#374151;margin:4px 0 12px 0;max-width:720px;margin-left:auto;margin-right:auto"><strong>This form estimates how long a loved one may have lived without air pollution in Delhi NCR.</strong></p>
           <div class="inputs">
             <div class="progress" aria-hidden="true" style="height:12px;background:#fff;border-radius:10px;margin-bottom:14px"><i id="progressBar" style="display:block;height:100%;background:linear-gradient(90deg,var(--primary),#cfe8fb);width:0%"></i></div>
 
@@ -109,7 +110,8 @@
               <section class="step" data-step="3">
                 <p class="meta">Step 3 of 8 — Age</p>
                 <label>Age at death (years)</label>
-                <input id="age" type="number" min="0" max="120" value="50" />
+                <input id="age" type="number" min="5" max="95" step="1" value="50" required />
+                <div id="ageHelp" style="font-size:13px;color:#b91c1c;font-weight:700;margin-top:6px;display:none">Please enter an age between 5 and 95 years.</div>
               </section>
 
               <!-- Step 4 -->
@@ -125,7 +127,7 @@
 
               <!-- Step 5 -->
               <section class="step" data-step="5">
-                <p class="meta">Step 5 of 8 — Smoking (at the time of death)</p>
+                <p class="meta">Step 5 of 8 — Smoking (<strong>at the time of death</strong>)</p>
                 <label>Smoking status</label>
                 <select id="smoke">
                   <option value="none">Never</option>
@@ -263,13 +265,41 @@
     const btnCalc = document.getElementById('btnCalc');
 
     btnBack.addEventListener('click', ()=>{ if(current>0) showStep(current-1); });
-    btnNext.addEventListener('click', ()=>{ if(current<steps.length-1) showStep(current+1); });
+    btnNext.addEventListener('click', ()=>{
+      // Prevent moving forward ONLY on Age step if age is out of allowed range
+      if(steps[current].getAttribute('data-step') === '3'){
+        const ageInput = document.getElementById('age');
+        const ageHelp = document.getElementById('ageHelp');
+        const a = Number(ageInput.value);
+        if(Number.isNaN(a) || a < 5 || a > 95){
+          ageInput.focus();
+          ageInput.style.borderColor = '#b91c1c';
+          ageHelp.style.display = 'block';
+          return; // block navigation
+        } else {
+          ageInput.style.borderColor = '#7f1d1d';
+          ageHelp.style.display = 'none';
+        }
+      }
+      if(current < steps.length-1) showStep(current+1);
+    });
 
     // Calculate -> gather inputs and show modal
+    // Enforce strict age bounds before calculation
+    function getValidAge(){
+      const ageInput = document.getElementById('age');
+      let a = Number(ageInput.value);
+      if (Number.isNaN(a)) a = 50;
+      if (a < 5) a = 5;
+      if (a > 95) a = 95;
+      ageInput.value = a; // snap back into range
+      return a;
+    }
+
     btnCalc.addEventListener('click', ()=>{
       const region = document.getElementById('region').value;
       const yearsInArea = Number(document.getElementById('yearsInArea').value);
-      const age = Number(document.getElementById('age').value) || 0;
+      const age = getValidAge();
       const outdoor = Number(document.getElementById('outdoor').value);
       const smoke = document.getElementById('smoke').value;
       const resp = document.getElementById('resp').value;
@@ -349,13 +379,26 @@
       let gainedYears = baseGainedYears * ageMultiplier;
 
       // Mitigate extreme values: cannot gain more years than reasonable remaining life expectancy
-      const baselineLE = 73; // contextual baseline used as cap
-      const maxPossibleGain = Math.max(0, baselineLE - age);
-      // absolute hard cap (avoid absurd outcomes)
+      // Sensible remaining-life cap with a soft floor so older ages still show a meaningful estimate
+      const baselineLE = 73; // contextual baseline
+      const rawRemaining = baselineLE - age;
+
+      // Soft remaining-life estimate:
+      // For ages above baseline, we still allow a small, declining remaining window
+      // instead of forcing the estimate to zero.
+      let remainingCap;
+      if (rawRemaining > 0) {
+        remainingCap = rawRemaining;
+      } else {
+        // After 73, allow a diminishing cap that tapers toward zero by age 95
+        // 73 → 4 years, 80 → ~2.5 years, 90 → ~1 year, 95 → ~0.5 years
+        remainingCap = Math.max(0.5, 4 * Math.exp(-(age - 73) / 10));
+      }
+
       const hardCapYears = 20;
 
-      // final gain is min of computed, remaining life until baseline, and hard cap
-      const finalGain = Math.min(gainedYears, maxPossibleGain, hardCapYears);
+      // final gain is min of computed, remaining cap, and hard cap
+      const finalGain = Math.min(gainedYears, remainingCap, hardCapYears);
 
       const counterfactualAge = age + finalGain;
 
@@ -368,11 +411,11 @@
       let phrase = '';
       if(Math.abs(upperY - lowerY) < 0.4){
         const val = Math.round(centralY);
-        phrase = `You could have had ${val} more year${val===1?'':'s'} with your loved one if it were not for pollution.`;
+        phrase = `💔❤️‍🩹 You could have had ${val} more year${val===1?'':'s'} with your loved one if it were not for pollution.`;
       } else {
         const a = Math.floor(lowerY);
         const b = Math.ceil(upperY);
-        phrase = `You could have had approximately ${a}–${b} more years with your loved one if it were not for pollution.`;
+        phrase = `💔❤️‍🩹 You could have had approximately ${a}–${b} more years with your loved one if it were not for pollution.`;
       }
 
       // show modal
