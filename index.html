@@ -90,14 +90,8 @@
           </section>
           <section class="step" data-step="3">
             <label>How old were they at the time of death?</label>
-            <p style="margin:6px 0 10px 0;font-size:14px;color:#374151">
-              Age helps us understand how vulnerable the body may have been to long-term air pollution. 
-              Older bodies are generally more affected by sustained exposure, while younger ages tend to show smaller pollution-related reductions.
-            </p>
-            <input id="age" type="number" min="5" max="95" value="50">
-            <div id="ageHelp" style="display:none;color:#b91c1c;font-weight:700">
-              Please enter an age between 5 and 95 years.
-            </div>
+            <input id="age" type="number" min="5" max="95" value="50" />
+            <div id="ageHelp" style="display:none;color:#b91c1c;font-weight:700">Please enter an age between 5 and 95 years.</div>
           </section>
           <section class="step" data-step="4">
             <label>What was their smoking status <span style="font-weight:500">(<strong>at the time of death</strong>)</span>?</label>
@@ -139,15 +133,6 @@
           <button id="btnCalc" class="btn calculate" style="display:none">Calculate</button>
         </div>
       </div>
-    </div>
-  </div>
-
-  <!-- Context modal (opens on page load) -->
-  <div id="contextModalBackdrop" class="modal-backdrop">
-    <div class="modal" style="text-align:center">
-      <p><strong>Air pollution in Delhi NCR shortens lives every year.</strong></p>
-      <p>This page reflects on time that may have been taken from those we lost.</p>
-      <button id="contextContinue" class="btn next">Continue</button>
     </div>
   </div>
 
@@ -293,14 +278,6 @@
   }
 
   showStep(0);
-
-  // Show context modal on page load
-  const contextModal = document.getElementById('contextModalBackdrop');
-  const contextBtn = document.getElementById('contextContinue');
-  if(contextModal && contextBtn){
-    contextModal.style.display = 'flex';
-    contextBtn.onclick = () => contextModal.style.display = 'none';
-  }
   document.getElementById('contextContinue').onclick=()=>document.getElementById('contextModalBackdrop').style.display='none';
 </script>
 </body>
