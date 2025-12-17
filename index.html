@@ -72,7 +72,7 @@
       <div class="wizard-wrap">
         <div class="progress" style="height:10px;background:#eee;border-radius:6px"><div id="progressBar" style="height:100%;width:0;background:var(--primary)"></div></div>
 
-        <form id="wizard">
+        <form id="wizard" onsubmit="return false;">
           <section class="step active" data-step="1">
             <label>Where did they live?</label>
             <select id="region">
@@ -291,7 +291,21 @@
   }
 
   showStep(0);
+  
   document.getElementById('contextContinue').onclick=()=>document.getElementById('contextModalBackdrop').style.display='none';
+  // Make Enter key behave like clicking "Next"
+document.getElementById('wizard').addEventListener('keydown', function (e) {
+  if (e.key === 'Enter') {
+    e.preventDefault();
+
+    if (current < steps.length - 1) {
+      btnNext.click();   // behave like Next
+    } else {
+      btnCalc.click();   // behave like Calculate on last step
+    }
+  }
+});
+
 </script>
 </body>
 </html>
